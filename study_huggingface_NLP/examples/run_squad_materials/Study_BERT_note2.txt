@@ -1,0 +1,163 @@
+@ I inspect BERT code which uses "SQuAD" dataset in terms of "finetuning", "prediction", "analysis on vocabulary", "analysis on text data"
+
+@ I performed "fine tune step" by using SQuAD dataset
+And following step is "test steps"
+
+- Load vocabulary from vocabulary file
+def load_vocab(vocab_file):
+github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/tokenization.py#L50
+
+- Contents of vocab file which contains 30522 number of words for SQuAD dataset
+drive.google.com/open?id=10wZm3w1XizWX-gFsojbBtc3IlKK4tc9a
+
+- Create tokenizer
+  1. Configure tokenizer environment via classmethod from_pretrained()
+  def from_pretrained(cls, pretrained_model_name_or_path, cache_dir=None, *inputs, **kwargs):
+  github.com/huggingface/pytorch-pretrained-BERT/blob/701bd59b8b161c5400dd22869b0df202adba4a39/pytorch_pretrained_bert/modeling.py#L529
+  2. Create BERT tokenizers (BasicTokenizer + WordpieceTokenizer + max_len)
+  class BertTokenizer(object):
+  github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/tokenization.py#L74  
+
+- Create pretrained BERT model
+github.com/huggingface/pytorch-pretrained-BERT/blob/master/examples/run_squad.py#L908
+model = BertForQuestionAnswering.from_pretrained(args.bert_model, cache_dir=os.path.join(str(PYTORCH_PRETRAINED_BERT_CACHE), 'distributed_{}'.format(args.local_rank)))
+
+  1. Load BERT pretrained model's configuration file
+  github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L600
+  config = BertConfig.from_json_file(config_file)
+  config {
+    "attention_probs_dropout_prob": 0.1,
+    "hidden_act": "gelu",
+    "hidden_dropout_prob": 0.1,
+    "hidden_size": 768,
+    "initializer_range": 0.02,
+    "intermediate_size": 3072,
+    "layer_norm_eps": 1e-12,
+    "max_position_embeddings": 512,
+    "num_attention_heads": 12,
+    "num_hidden_layers": 12,
+    "type_vocab_size": 2,
+    "vocab_size": 30522
+  }
+
+  2. Create Pretrained BERT model
+  github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L603
+  model = cls(config, *inputs, **kwargs)
+
+  3. Load pretrained file
+    1. Configure file path
+      github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L605
+      weights_path = os.path.join(serialization_dir, WEIGHTS_NAME)
+      # /tmp/tmpg7pa6c6e/pytorch_model.bin
+    2. Load pretrained-word-embedding-matrix which has information of general language understanding
+      github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L606
+      state_dict = torch.load(weights_path, map_location='cpu')
+      # OrderedDict([('bert.embeddings.word_embeddings.weight', tensor([[-0.0102, -0.0615, -0.0265,  ..., -0.0199, -0.0372, -0.0098],
+      #                                                                 [-0.0117, -0.0600, -0.0323,  ..., -0.0168, -0.0401, -0.0107],
+      #                                                                 [-0.0198, -0.0627, -0.0326,  ..., -0.0165, -0.0420, -0.0032],
+      #                                                                 ...,
+      #                                                                 [-0.0218, -0.0556, -0.0135,  ..., -0.0043, -0.0151, -0.0249],
+      #                                                                 [-0.0462, -0.0565, -0.0019,  ...,  0.0157, -0.0139, -0.0095],
+      #                                                                 [ 0.0015, -0.0821, -0.0160,  ..., -0.0081, -0.0475,  0.0753]])),
+      #              ('bert.embeddings.position_embeddings.weight', tensor([[ 1.7505e-02, -2.5631e-02, -3.6642e-02,  ...,  3.3437e-05,
+      #                                                                 6.8312e-04,  1.5441e-02],
+      #                                                                 [ 7.7580e-03,  2.2613e-03, -1.9444e-02,  ...,  2.8910e-02,
+      #                                                                 2.9753e-02, -5.3247e-03],
+      #                                                                 [-1.1287e-02, -1.9644e-03, -1.1573e-02,  ...,  1.4908e-02,
+      #                                                                 1.8741e-02, -7.3140e-03],
+      #                                                                 ...,
+
+    3. Insert above loaded word-embedding matrix into PyTorch's BERT model
+      github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L614
+      # Load from a PyTorch state_dict
+
+      Embedding matrix is composed of multiple key-value structures
+      Each key means each layers of BERT network
+      # print("state_dict.keys()",state_dict.keys())
+      # odict_keys(['bert.embeddings.word_embeddings.weight',
+      #             'bert.embeddings.position_embeddings.weight',
+      #             'bert.embeddings.token_type_embeddings.weight',
+      #             'bert.embeddings.LayerNorm.gamma',
+      #             'bert.embeddings.LayerNorm.beta',
+      #             'bert.encoder.layer.0.attention.self.query.weight',
+      #             'bert.encoder.layer.0.attention.self.query.bias',
+      #             'bert.encoder.layer.0.attention.self.key.weight',
+      #             'bert.encoder.layer.0.attention.self.key.bias',
+      #             'bert.encoder.layer.0.attention.self.value.weight',
+      #             'bert.encoder.layer.0.attention.self.value.bias',
+
+      Interestingly and I don't know why, huggingface BERT project doesn't directly use model file of /tmp/tmpg7pa6c6e/pytorch_model.bin
+      But it replace some keys (which have "gamma" and "beta")' name with "weight" and "bias"
+      For example, 
+      before change: bert.embeddings.LayerNorm.gamma
+      after change: bert.embeddings.LayerNorm.weight
+      github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L619
+      if 'gamma' in key:
+
+      - Explain on code
+      1. Explain on pop()
+      # a = [1,2,3]
+      # Extract 1th element and return it, remove 1th element from "list a"
+      # return_val=a.pop(1)
+      # print(return_val)
+      # 2
+      # print(a)
+      # [1, 3]
+      
+      2. Meaning of following sentence
+      # Extract "old_key element" and return "old_key element" from "state_dict", remove "old_key element" from "state_dict"
+      # Conclusive meaning: You want to do followng change
+      # state_dice={"old_key_alpha":old_key_val,"old_key_beta":old_key_val2,"old_key_gamma":old_key_val3}
+      # state_dice={"old_key_alpha":old_key_val,"old_key_bias":old_key_val2,"old_key_weight":old_key_val3}
+      state_dict[new_key] = state_dict.pop(old_key)
+
+    4. Copy original state_dict array (I guess copying is required cause code will change state_dict in finetuning training)  
+    # Get metadata of state_dict
+    metadata = getattr(state_dict, '_metadata', None)
+    # Copy state_dict
+    state_dict = state_dict.copy()
+    if metadata is not None:
+        # Insert metadata into copied state_dict
+        state_dict._metadata = metadata
+
+    5. Insert pretrained word-embedding matrix values into PyTorch BERT model
+    github.com/huggingface/pytorch-pretrained-BERT/blob/master/pytorch_pretrained_bert/modeling.py#L648
+    load(model, prefix=start_prefix)
+
+- Load text data file which you will pass into BERT (pretrained + finetuned) model
+  1. Configure file path which you will load is /mnt/1T-5e7/mycodehtml/NLP/huggingface/Data/SQuAD/dev-v1.1.json
+  github.com/huggingface/pytorch-pretrained-BERT/blob/master/examples/run_squad.py#L1047
+  eval_examples = read_squad_examples(input_file=args.predict_file, is_training=False, version_2_with_negative=args.version_2_with_negative)
+
+  2. Actually load text data
+  input_data = json.load(reader)["data"]
+  drive.google.com/open?id=1dq5toMey-lfkQ_qdFXhbczk0SVJKg9ww
+
+  Structure of text data for testing
+  drive.google.com/open?id=1mml39Ep2TU4VhBxtpDByhkftjyE0APQE
+
+  3. Preprecessing text data (Split text data into token structure)
+  github.com/huggingface/pytorch-pretrained-BERT/blob/master/examples/run_squad.py#L133
+  for entry in input_data:
+
+  4. Convert token structure data into numerical data (which has CLS, SEP, MASK speficial tokens) which can be consumed in BERT model
+  github.com/huggingface/pytorch-pretrained-BERT/blob/master/examples/run_squad.py#L1049
+  eval_features = convert_examples_to_features(
+            examples=eval_examples,tokenizer=tokenizer,max_seq_length=args.max_seq_length,doc_stride=args.doc_stride,max_query_length=args.max_query_length,is_training=False)
+  
+  5. Final input data
+  drive.google.com/open?id=15mz8oTpBwFSk-TOqwtpXFCkdF8IusXAm
+
+- Pass final input data into Q&A BERT model (for SQuAD dataset)
+  1. Structure
+  drive.google.com/open?id=1zcuP9dgELCcmTxBFk3SBqLSdHNfza90m
+
+@ pretrained BERT (uncased_L-12_H-768_A-12: uncase version, BERT base: small size)
+- I download BERT's pretrained model
+github.com/google-research/bert#pre-trained-models
+
+I specifically downloaded following pretrained BERT
+BERT-Base, Uncased: 12-layer, 768-hidden, 12-heads, 110M parameters
+
+@ I upload finetuned BERT on SQuAD dataset
+drive.google.com/open?id=1T6phRU5-0P54jwbNfOwOhi86hLzidzLR

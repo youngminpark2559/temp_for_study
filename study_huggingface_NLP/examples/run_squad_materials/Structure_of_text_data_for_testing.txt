@@ -1,0 +1,40 @@
+"data"
+  "title": "Warsaw",
+  "paragraphs":
+    "context": "One of the most famous people born in Warsaw was Maria Skłodowska-Curie,....."
+    "qas": (maybe Q&As)
+      "answers": "Nobel Prize"
+      "answers": "Nobel Prize"
+      "answers": "Nobel Prize" (maybe each question has 3 related answer, if answer if clear it's 3 duplicated answers)
+      "question": "What was Maria Curie the first female recipient of?"  
+      "answers": "1745"
+      "answers": "1745"
+      "answers": "1745"
+      "question": "What year was Casimir Pulaski born in Warsaw?"
+      ...
+    "context": "The Saxon Garden, covering the area of 15.5 ha, was formally a royal garden......"
+      "answers": "Łazienki"
+      "answers": "Łazienki"
+      "answers": "Łazienki Park"
+      "question": "What park covers an area of 76 ha.?"
+  
+  "title": "Super_Bowl_50",
+  "paragraphs":
+    "context": "Super Bowl 50 was an American football game to determine the champion of the National Football....."
+    "qas":
+      "answers": "Denver Broncos"
+      "answers": "Denver Broncos"
+      "answers": "Denver Broncos"
+      "question": "Which NFL team represented the AFC at Super Bowl 50?"  
+      "answers": "Carolina Panthers"
+      "answers": "Carolina Panthers"
+      "answers": "Carolina Panthers"
+      "question": "Which NFL team represented the NFC at Super Bowl 50?"
+      ...
+    "context": "The Panthers finished the regular season with a 15–1 record, and quarterback Cam Newton was named the......"
+      "answers": "Cam Newton"
+      "answers": "Cam Newton"
+      "answers": "Cam Newton"
+      "question": "Which Carolina Panthers player was named Most Valuable Player?"
+      
+"version": "1.1"

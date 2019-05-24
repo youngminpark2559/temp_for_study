@@ -1,0 +1,71 @@
+BertForQuestionAnswering start
+
+  BertModel start 
+
+    BertEmbeddings start
+      
+      word_embeddings
+      
+      position_embeddings
+      
+      token_type_embeddings
+
+      BertLayerNorm
+
+    BertEmbeddings end
+
+    BertEncoder start
+
+      BertLayer start
+
+        BertAttention start
+          
+          BertSelfAttention start
+            
+            Q,K,V,attention_scores,attention_probs,context_layer
+          
+          BertSelfAttention end
+
+          BertSelfOutput start
+            
+            Linear
+
+            BertLayerNorm
+
+            Dropout
+          
+          BertSelfOutput end
+
+        BertAttention end
+
+        BertIntermediate start
+
+          dense
+
+          activation function like gelu
+
+        BertIntermediate end
+
+        BertOutput start
+
+          dense
+          
+          dropout
+          
+          LayerNorm
+        
+        BertLayer end
+
+    BertEncoder end
+
+    BertPooler start
+
+      dense
+      
+      activation (tanh)
+    
+    BertPooler end
+
+  BertModel end
+
+BertForQuestionAnswering end
