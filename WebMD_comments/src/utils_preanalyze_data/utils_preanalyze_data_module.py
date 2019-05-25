@@ -1208,7 +1208,7 @@ def histogram_score(df_score,cond_name,args):
   plt.show()
   
   # ================================================================================
-  # /home/young/Pictures/2019_05_25_17:14:36.png
+  # https://raw.githubusercontent.com/youngminpark2559/temp_for_study/master/WebMD_comments/img_out/Analyze_train_data/2019_05_25_17%3A14%3A36.png
   # Meaning:
   # - This is score data of "condition type 2 diabetes mellitus"
   # - Effectiveness is almost Normal distribution
@@ -1219,13 +1219,13 @@ def histogram_score(df_score,cond_name,args):
   # - So, customers who feel unsatifaction can find other treatment
 
   # ================================================================================
-  # /home/young/Pictures/2019_05_25_17:22:36.png
+  # https://raw.githubusercontent.com/youngminpark2559/temp_for_study/master/WebMD_comments/img_out/Analyze_train_data/2019_05_25_17%3A22%3A36.png
   # - This is score data of "condition prevention of type 2 diabetes mellitus"
   # - Effectiveness is also Normal distribution
   # - Ease_of_Use and Satisfaction feature also have simialr pattern with the one of "condition type 2 diabetes mellitus"
 
   # ================================================================================
-  # /home/young/Pictures/2019_05_25_17:25:46.png
+  # https://raw.githubusercontent.com/youngminpark2559/temp_for_study/master/WebMD_comments/img_out/Analyze_train_data/2019_05_25_17%3A25%3A46.png
   # - This is score data of "condition other"
   # - I don't know what other means
   # - Anyway, Effectiveness has more frequency in high scores than above 2 conditions
@@ -1233,7 +1233,7 @@ def histogram_score(df_score,cond_name,args):
   # - In Satisfaction, except for lower frequence in lowest value (1), customer's evaluation is not clear (some is positive, some is negative)
 
   # ================================================================================
-  # /home/young/Pictures/2019_05_25_18:10:01.png
+  # https://raw.githubusercontent.com/youngminpark2559/temp_for_study/master/WebMD_comments/img_out/Analyze_train_data/2019_05_25_18%3A10%3A01.png
   # - Effectiveness is high for condition of "disease of ovaries with cysts"
   # - Ease_of_Use is also high
   # - Satisfaction is somewhat high
