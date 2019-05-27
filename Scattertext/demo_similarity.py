@@ -57,29 +57,31 @@ def main():
   #                           nlp=nlp).build()
   
   # ================================================================================
-  utils_data.analyze_data()
-  
-  corpus = CorpusFromPandas(convention_df,
-                            category_col='category',
-                            text_col='text',
-                            nlp=nlp).build()
+  all_satisfaction_score_comment_in_all_conds=utils_data.get_all_satisfaction_score_comment_in_all_conds()
+  # print("all_satisfaction_score_comment_in_all_conds",all_satisfaction_score_comment_in_all_conds)
+  # [['negative', 'Satisfaction', 'after a week----mouth ulccers,cudnt talk,eat,drink for 5 days....whole body burnt,headache, fatigue....quit---am slowly getting better, wudnt give to my worst 
+
+  # print("all_satisfaction_score_comment_in_all_conds",len(all_satisfaction_score_comment_in_all_conds))
+  # 1402
   
   # ================================================================================
-  html = word_similarity_explorer(corpus,
-                                  category='negative',
-                                  category_name='Negative',
-                                  not_category_name='Positive',
-                                  target_term='jobs',
-                                  minimum_term_frequency=5,
-                                  width_in_pixels=1000,
-                                  metadata=convention_df['feature'],
-                                  alpha=0.01,
-                                  max_p_val=0.1,
-                                  save_svg_button=True)
+  columns=['senti_on_Metfor_oral','feature','review']
+  all_satisfaction_score_comment_in_all_conds_df=pd.DataFrame(all_satisfaction_score_comment_in_all_conds,index=None,columns=columns)
+
+  # ================================================================================
+  corpus=CorpusFromPandas(
+    all_satisfaction_score_comment_in_all_conds_df,category_col='senti_on_Metfor_oral',text_col='review',nlp=nlp).build()
+  
+  # ================================================================================
+  html=word_similarity_explorer(
+    corpus,category='negative',category_name='Negative',not_category_name='Positive',target_term='jobs',
+    minimum_term_frequency=5,width_in_pixels=1000,metadata=all_satisfaction_score_comment_in_all_conds_df['feature'],
+    alpha=0.01,max_p_val=0.1,save_svg_button=True)
   
   # ================================================================================
   open('/mnt/1T-5e7/mycodehtml/Data_mining/Visualization/Scattertext/demo_similarity.html', 'wb').write(html.encode('utf-8'))
   print('Open ./demo_similarlity.html in Chrome or Firefox.')
 
+# ================================================================================
 if __name__ == '__main__':
   main()
