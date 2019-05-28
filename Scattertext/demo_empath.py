@@ -47,14 +47,14 @@ def main():
 
   # ================================================================================
   corpus=CorpusFromParsedDocuments(
-		all_satisfaction_score_comment_in_all_conds_df,category_col='senti_on_Metfor_oral',
-		parsed_col='review',feats_from_spacy_doc=feat_builder).build()
+    all_satisfaction_score_comment_in_all_conds_df,category_col='senti_on_Metfor_oral',
+    parsed_col='review',feats_from_spacy_doc=feat_builder).build()
 
   # ================================================================================
   html=produce_scattertext_explorer(
-		corpus,category='negative',category_name='Negative',not_category_name='Positive',width_in_pixels=1000,
-		metadata=all_satisfaction_score_comment_in_all_conds_df['feature'],use_non_text_features=True,
-		use_full_doc=True,topic_model_term_lists=feat_builder.get_top_model_term_lists())
+    corpus,category='negative',category_name='Negative',not_category_name='Positive',width_in_pixels=1000,
+    metadata=all_satisfaction_score_comment_in_all_conds_df['feature'],use_non_text_features=True,
+    use_full_doc=True,topic_model_term_lists=feat_builder.get_top_model_term_lists())
 
   # ================================================================================
   open('/mnt/1T-5e7/mycodehtml/Data_mining/Visualization/Scattertext/Convention-Visualization-Empath.html', 'wb').write(html.encode('utf-8'))
