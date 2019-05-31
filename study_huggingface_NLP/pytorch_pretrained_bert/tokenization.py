@@ -118,9 +118,11 @@ class BertTokenizer(object):
         # print("vocab_file",vocab_file)
         # /home/young/.cache/torch/pytorch_pretrained_bert/26bc1ad6c0ac742e9b52263248f6d0f00068293b33709fae12320c0e35ccfbbb.542ce4285a40d23a559526243235df47c5f75c197f04f37d1a0c124c32c9a084
 
+        vocab_file="/home/young/Downloads/biobert_v1.1_pubmed/vocab.txt"
+
         self.vocab = load_vocab(vocab_file)
         # print("self.vocab",self.vocab)
-        # OrderedDict([('[PAD]', 0), ('[unused0]', 1), ('[unused1]', 2),
+        # OrderedDict([('[PAD]', 0), ('[unused1]', 1), ('[unused2]', 2), ('[unused3]', 3), ('[unused4]', 4), ('[unused5]', 5), ('[unused6]', 6), ('[unused7]', 7), ('[unused8]', 8), ('[unused9]', 9), ('[unused10]', 10), ('[unused11]', 11), ('[unused12]', 12), ('[unused13]', 13), ('[unused14]', 14), ('[unused15]', 15), ('[unused16]', 16), ('[unused17]', 17), ('[unused18]', 18), ('[unused19]'
 
         self.ids_to_tokens = collections.OrderedDict([(ids, tok) for tok, ids in self.vocab.items()])
         # print("self.ids_to_tokens",self.ids_to_tokens)

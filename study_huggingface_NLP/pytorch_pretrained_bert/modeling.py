@@ -63,6 +63,10 @@ def load_tf_weights_in_bert(model, tf_checkpoint_path):
     print("Converting TensorFlow checkpoint from {}".format(tf_path))
     # Load weights from TF model
     init_vars = tf.train.list_variables(tf_path)
+
+    excluded = ['BERTAdam','_power','global_step']
+    init_vars = list(filter(lambda x:all([True if e not in x[0] else False for e in excluded]),init_vars))
+
     names = []
     arrays = []
     for name, shape in init_vars:
@@ -614,11 +618,20 @@ class BertPreTrainedModel(nn.Module):
             # Backward compatibility with old naming format
             config_file = os.path.join(serialization_dir, BERT_CONFIG_NAME)
         
+        # print("config_file",config_file)
+        # /tmp/tmpa1z7ekub/bert_config.json
+        config_file="/home/young/Downloads/biobert_v1.1_pubmed/bert_config.json"
+
         config = BertConfig.from_json_file(config_file)
         logger.info("Model config {}".format(config))
 
         # ================================================================================
-        # Instantiate model.
+        # Instantiate model
+        # print("inputs",inputs)
+        # ()
+        # print("kwargs",kwargs)
+        # {}
+
         model = cls(config, *inputs, **kwargs)
 
         # ================================================================================
@@ -632,6 +645,8 @@ class BertPreTrainedModel(nn.Module):
             weights_path = os.path.join(serialization_dir, WEIGHTS_NAME)
             # print("weights_path",weights_path)
             # /tmp/tmpg7pa6c6e/pytorch_model.bin
+
+            weights_path="/home/young/Downloads/biobert_v1.1_pubmed/pytorch_BioBERT_model.bin"
 
             state_dict = torch.load(weights_path, map_location='cpu')
             # print("state_dict",state_dict)
@@ -649,7 +664,10 @@ class BertPreTrainedModel(nn.Module):
             #                                                                 [-1.1287e-02, -1.9644e-03, -1.1573e-02,  ...,  1.4908e-02,
             #                                                                 1.8741e-02, -7.3140e-03],
             #                                                                 ...,
-        
+
+            # print('state_dict["bert.embeddings.word_embeddings.weight"]',state_dict["bert.embeddings.word_embeddings.weight"].shape)
+            # torch.Size([28996, 768])
+
         # ================================================================================
         # print("tempdir",tempdir)
         # /tmp/tmpr1bjnt8s
@@ -659,6 +677,9 @@ class BertPreTrainedModel(nn.Module):
             shutil.rmtree(tempdir)
 
         # ================================================================================
+        # print("from_tf",from_tf)
+        # False
+
         if from_tf:
             # Directly load from a TensorFlow checkpoint
             weights_path = os.path.join(serialization_dir, TF_WEIGHTS_NAME)
@@ -698,7 +719,7 @@ class BertPreTrainedModel(nn.Module):
             if new_key:
                 old_keys.append(key)
                 new_keys.append(new_key)
-        
+
         # ================================================================================
         for old_key, new_key in zip(old_keys, new_keys):
             # print("old_key",old_key)
@@ -740,12 +761,11 @@ class BertPreTrainedModel(nn.Module):
         missing_keys = []
         unexpected_keys = []
         error_msgs = []
-
         
         # Get value from _metadata attribute in state_dict object
         metadata = getattr(state_dict, '_metadata', None)
         # print("metadata",metadata)
-        # OrderedDict([('', {'version': 1}), ('bert', {'version': 1}), ('bert.embeddings', {'version': 1}), ('bert.embeddings.word_embeddings', {'version': 1}), ('bert.embeddings.position_embeddings', {'version': 1}), ('bert.embeddings.token_type_embeddings', {'version': 1}), ('bert.embeddings.LayerNorm', {'version': 1}), ('bert.embeddings.dropout', {'version': 1}), ('bert.encoder', {'version': 1}), ('bert.encoder.layer', {'version': 1}), ('bert.encoder.layer.0', {'version': 1}), ('bert.encoder.layer.0.attention', {'version': 1}), ('bert.encoder.layer.0.attention.self', {'version': 1}), ('bert.encoder.layer.0.attention.self.query', {'version': 1}), ('bert.encoder.layer.0.attention.self.key', {'version': 1}), ('bert.encoder.layer.0.attention.self.value', 
+        # OrderedDict([('', {'version': 1}), ('bert', {'version': 1}), ('bert.embeddings', {'version': 1}), ('bert.embeddings.word_embeddings', {'version': 1}), ('bert.embeddings.position_embeddings', 
 
         # ================================================================================
         # copy state_dict so _load_from_state_dict can modify it
@@ -1254,15 +1274,72 @@ class BertForPreTraining(BertPreTrainedModel):
 
   def forward(self,input_ids,token_type_ids=None,attention_mask=None,masked_lm_labels=None,next_sentence_label=None):
     
+    # print("input_ids",input_ids.shape)
+    # torch.Size([8, 128])
+    # print("token_type_ids",token_type_ids.shape)
+    # torch.Size([8, 128])
+    # print("attention_mask",attention_mask.shape)
+    # torch.Size([8, 128])
+
+    # print("input_ids",input_ids)
+    # tensor([[  101,   103,  3793,  ...,     0,     0,     0],
+    #         [  101,  3793,  2323,  ...,     0,     0,     0],
+
+    # torch.Size([8, 128])
+    # print("token_type_ids",token_type_ids.shape)
+    # torch.Size([8, 128])
+    # print("attention_mask",attention_mask.shape)
+    # torch.Size([8, 128])
+    
+    # ================================================================================
     sequence_output,pooled_output=self.bert(input_ids,token_type_ids,attention_mask,output_all_encoded_layers=False)
+    # print("sequence_output",sequence_output)
+    # print("pooled_output",pooled_output)
+
+    # print("sequence_output",sequence_output.shape)
+    # torch.Size([8, 128, 768])
+
+    # print("pooled_output",pooled_output.shape)
+    # torch.Size([8, 768])
 
     prediction_scores,seq_relationship_score=self.cls(sequence_output,pooled_output)
+    # print("prediction_scores",prediction_scores)
+    # tensor([[[ -7.1319,  -7.0207,  -7.0594,  ...,  -6.2590,  -6.3091,  -4.1137],
+    #          [ -6.4123,  -6.1975,  -6.2164,  ...,  -5.2886,  -6.2117,  -5.5325],
 
-    if masked_lm_labels is not None and next_sentence_label is not None:
+    # print("prediction_scores",prediction_scores.shape)
+    # torch.Size([8, 128, 30522])
+
+    # print("seq_relationship_score",seq_relationship_score)
+    # tensor([[ 4.4548, -3.4527],
+    #         [-2.4862,  5.0490],
+
+    # print("seq_relationship_score",seq_relationship_score.shape)
+    # torch.Size([8, 2])
+    
+    # seq_relationship_score
+
+
+    # ================================================================================
+    # print("masked_lm_labels",masked_lm_labels)
+    # tensor([[  -1, 2023,   -1,  ...,   -1,   -1,   -1],
+    #         [  -1,   -1,   -1,  ...,   -1,   -1,   -1],
+    
+    # print("next_sentence_label",next_sentence_label)
+    # tensor([0, 1, 1, 1, 1, 1, 0, 0], device='cuda:0')
+
+    if (masked_lm_labels is not None) and (next_sentence_label is not None):
       loss_fct = CrossEntropyLoss(ignore_index=-1)
+
+      # ================================================================================
       masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), masked_lm_labels.view(-1))
+
+      # ================================================================================
       next_sentence_loss = loss_fct(seq_relationship_score.view(-1, 2), next_sentence_label.view(-1))
+
+      # ================================================================================
       total_loss = masked_lm_loss + next_sentence_loss
+
       return total_loss
     else:
       return prediction_scores, seq_relationship_score
