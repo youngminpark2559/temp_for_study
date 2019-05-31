@@ -1,0 +1,96 @@
+@ I load "pretrained glove word embedding array"
+github.com/youngminpark2559/nlp/blob/master/joosthub/chapters/chapter_5/5_1_Pretrained_Embeddings.py
+embeddings = PreTrainedEmbeddings.from_embeddings_file('www.kaggle.com/terenceliu4444/glove6b100dtxt')
+
+- I need to solve this NLP question.
+github.com/youngminpark2559/nlp/blob/master/joosthub/chapters/chapter_5/5_1_Pretrained_Embeddings.py
+embeddings.compute_and_print_analogy('man', 'he', 'woman')
+
+man is related to he, woman is related to she, so I should find "she" word vector from above embedding array
+
+- So, here, I find each word vector from 3 words.
+github.com/youngminpark2559/nlp/blob/master/joosthub/chapters/chapter_5/5_1_Pretrained_Embeddings.py
+vec1 = self.get_embedding(word1)
+
+  - And I perform simple vector operations like summation and subtraction.
+  
+  - And I can calculate final vector 4 which potentially indicates the word "she"
+  - But since that exact vector doesn't exist in the word-embedding-array, so, we should find "just close vector to that vector4"
+  - And for that, we can use Euclidean distance, cdist function provided from SciPy, or k-nearest neighbor function provided from sklearn
+
+@ Anyway, with this guide and instruction, I did the same thing with BioBERT.
+
+- First, I would like to let you know that I converted TensorFlow BioBERT checkpoint files into PyTorch BioBERT checkpoint files
+
+@ I test finetuning on BioBERT
+
+- Load BioBERT vocab file
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/pytorch_pretrained_bert/tokenization.py
+vocab_file="/home/young/Downloads/biobert_v1.1_pubmed/vocab.txt"
+
+- Pass type_2_diabetes_text_data file, tokenizer, into BERTDataset constructor
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_LM_model.py
+train_dataset = BERTDataset(args.train_corpus, tokenizer, seq_len=args.max_seq_length,
+
+- After executing following sentence, let's preview the input data for the BERT
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_LM_model.py
+# 05/31/2019 15:26:48 - INFO - __main__ -   tokens: [CLS] [MASK] ’ s the difference between [MASK] 1 [MASK] type 2 [MASK] ?
+
+  - Meaning
+    - 2 sentences are being used
+    - By random probability, "MASK", "replacing with random words" are used to train BERT to understand language understanding
+    - 2 sentences are extracted in not-sequential ones (Is next sentence label: 0) by random probability
+
+- Manually configure BioBERT configure file
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/pytorch_pretrained_bert/modeling.py
+config_file="/home/young/Downloads/biobert_v1.1_pubmed/bert_config.json"
+
+- Manually configure BioBERT pretrained checkpoint file
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/pytorch_pretrained_bert/modeling.py
+weights_path="/home/young/Downloads/biobert_v1.1_pubmed/pytorch_BioBERT_model.bin"
+
+- I made a mistake on the code which converts the BioBERT (TensorFlow) into the BioBERT (PyTorch)
+See incorrect sentence here, pytorch_pretrained_bert convert_tf_checkpoint_to_pytorch \
+
+Correct sentence
+  - Download BioBERT
+  - (Important) Change name of BioBERT's 3 checkpoint files to be same with the name of original 3 checkpoint files
+  - In the directory which contains BioBERT checkpoint files, run following
+  export BioBERT_BASE_DIR=/home/young/Downloads/biobert_v1.1_pubmed
+  pytorch_pretrained_bert convert_tf_checkpoint_to_pytorch \
+    $BioBERT_BASE_DIR/bert_model.ckpt \
+    $BioBERT_BASE_DIR/bert_config.json \
+    $BioBERT_BASE_DIR/pytorch_BioBERT_model.bin
+
+- You are returned to here, with successfully loaded BioBERT pretrained checkpoint file
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_LM_model.py
+model = BertForPreTraining.from_pretrained(args.bert_model)
+
+- Log of training, and finetuned model has been saved to the directory
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Log_of_fine_tuning_with_type2_diabetes_text_data.txt
+
+@ I test using BioBERT word embedding
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_embedding_array_in_inference_mode.py
+
+- Load BioBERT word-embedding-array
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_embedding_array_in_inference_mode.py
+word_embedding_weights=load_checkpoint_file()
+
+- Find 768 dimension vector for word of "diabetes" from bio vocab.txt file
+github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_embedding_array_in_inference_mode.py
+# word_diabetes=word_embedding_weights[17973,:]
+
+- Calculate "near distance" from "diabetes vector" by using 3 ways
+  - 1. Use for loop to calculate distance
+  github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_embedding_array_in_inference_mode.py
+  # min_dist = None
+  - 2. Use SciPy's cdist()
+  github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_embedding_array_in_inference_mode.py
+  # from scipy.spatial.distance import cdist
+  - 3. Use sklearn's K-nearest Neighbor
+  github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/Test_BERT_embedding_array_in_inference_mode.py
+  from sklearn.neighbors import NearestNeighbors
+  - Meaning:
+    - Above 3 ways can find near vector. But result was not good
+    - So, I try to finetune BioBERT with more large data which I crawled before
+    github.com/youngminpark2559/temp_for_study/blob/master/study_huggingface_NLP/examples/My_test/ffff.txt
