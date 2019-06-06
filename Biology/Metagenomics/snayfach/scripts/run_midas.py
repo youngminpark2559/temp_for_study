@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# /mnt/1T-5e7/mycodehtml/Biology/Metagenomics/snayfach/scripts/run_midas.py
+
 # MIDAS: Metagenomic Intra-species Diversity Analysis System
 # Copyright (C) 2015 Stephen Nayfach
 # Freely distributed under the GNU General Public License (GPLv3)
