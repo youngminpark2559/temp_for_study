@@ -1,0 +1,5 @@
+"35-44 on Treatment for less than 1 month (Patient)"
+"Ladybug, 55-64 on Treatment for 1 to 6 months (Patient)"
+"BarryLodge75, on Treatment for 2 to less than 5 years (Patient)"
+"Niki213, 65-74 Female on Treatment for 5 to less than 10 years (Patient)"
+"45-54 Male on Treatment for less than 1 month (Patient)"
